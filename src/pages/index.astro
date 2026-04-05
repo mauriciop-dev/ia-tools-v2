@@ -1,17 +1,492 @@
 ---
-
+import Layout from '../layouts/Layout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Dashboard" description="Control center for IA Tools 2.0 - Tracking Google & AI industry">
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">▲</span>
+      <h1>IA TOOLS <span class="accent">2.0</span></h1>
+    </div>
+    <p class="subtitle">Analizando novedades de Google, YouTube y X en tiempo real.</p>
+  </header>
+
+  <nav class="nav-container">
+    <button class="nav-item active" data-section="tech">TECNOLOGÍAS</button>
+    <button class="nav-item" data-section="sources">FUENTES</button>
+    <button class="nav-item" data-section="pubs">PUBLICACIONES</button>
+  </nav>
+
+  <section id="tech-section" class="section active">
+    <div class="section-header">
+      <h2>Descubrimientos de Hoy</h2>
+      <div class="filters">
+        <span class="tag">Todos</span>
+        <span class="tag">Google</span>
+        <span class="tag">AI Research</span>
+      </div>
+    </div>
+    
+    <div class="grid">
+      <Card 
+        title="Gemma 4 en iPhone: IA Local Avanzada"
+        summary="Google ha habilitado la ejecución de modelos Gemma 4 directamente en dispositivos iOS mediante la app AI Edge Gallery, permitiendo inferencia privada y offline."
+        technology="Gemma 4 / Mobile AI"
+        use_cases={[
+          "Asistentes privados con datos sensibles.",
+          "IA funcional en zonas sin conectividad.",
+          "Apps de baja latencia para juegos y AR."
+        ]}
+        is_new={true}
+        platform="X"
+      />
+      
+      <Card 
+        title="Guía Visual de Arquitectura Gemma 4"
+        summary="Se ha publicado un desglose detallado de cómo Gemma 4 procesa entradas multimodales (texto, imagen, audio) en sus variantes más optimizadas."
+        technology="Deep Learning"
+        use_cases={[
+          "Material educativo para ingenieros de ML.",
+          "Referencia de optimización para devs.",
+          "Comparativa arquitectónica de modelos abiertos."
+        ]}
+        is_new={true}
+        platform="X"
+      />
+
+      <Card 
+        title="Gemini Enterprise: IA para Corporativos"
+        summary="Google Cloud presenta nuevas capacidades de Gemini enfocadas en privacidad de datos empresariales e integración profunda con Google Workspace."
+        technology="Gemini / Enterprise"
+        use_cases={[
+          "Generación automatizada de reportes internos.",
+          "Búsqueda segura en bases de conocimiento corporativas.",
+          "Resúmenes ejecutivos con planes de acción."
+        ]}
+        platform="YouTube"
+      />
+
+      <Card 
+        title="AI Impact Summit 2026: Inversión Social"
+        summary="Google anuncia un fondo de $50M para proyectos de IA con impacto social, centrándose en salud global y sostenibilidad ambiental."
+        technology="Social Impact AI"
+        use_cases={[
+          "Detección temprana de enfermedades en zonas rurales.",
+          "Modelado climático predictivo para agricultura.",
+          "Optimización de recursos energéticos urbanos."
+        ]}
+        platform="YouTube"
+      />
+    </div>
+  </section>
+
+  <section id="sources-section" class="section">
+    <div class="glass-card">
+      <div class="section-header">
+        <h2>Gestionar Fuentes</h2>
+        <button class="btn-primary">+ Añadir Fuente</button>
+      </div>
+      <div class="sources-grid">
+        <div class="source-item">
+          <div class="source-info">
+            <strong>Gemma 4 (Official)</strong>
+            <span>x.com/googlegemma</span>
+          </div>
+          <span class="status-badge online">Activo</span>
+        </div>
+        <div class="source-item">
+          <div class="source-info">
+            <strong>Google DeepMind</strong>
+            <span>x.com/googledeepmind</span>
+          </div>
+          <span class="status-badge online">Activo</span>
+        </div>
+        <div class="source-item">
+          <div class="source-info">
+            <strong>Google Cloud Tech</strong>
+            <span>youtube.com/@googlecloudtech</span>
+          </div>
+          <span class="status-badge online">Activo</span>
+        </div>
+        <div class="source-item">
+          <div class="source-info">
+            <strong>NotebookLM</strong>
+            <span>x.com/notebooklm</span>
+          </div>
+          <div class="status-badge offline">Pausado</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pubs-section" class="section">
+     <div class="section-header">
+        <h2>Generador de Campañas</h2>
+      </div>
+      <div class="pubs-grid">
+        <div class="glass-card pub-selector">
+          <h3>1. Selecciona Tecnología</h3>
+          <div class="pub-options">
+            <div class="pub-option" data-tech="Gemma 4">
+              <span class="dot"></span>
+              Gemma 4 en iPhone
+            </div>
+            <div class="pub-option" data-tech="Gemini Robotics">
+              <span class="dot"></span>
+              Google DeepMind DNA en Robots
+            </div>
+            <div class="pub-option" data-tech="AI Social Impact">
+              <span class="dot"></span>
+              AI Impact Summit (Google)
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card pub-editor">
+          <h3>2. Post Generado</h3>
+          <div id="generated-post" class="post-preview">
+            <p class="text-muted">Selecciona una tecnología a la izquierda para redactar el post viral...</p>
+          </div>
+          <div class="post-actions">
+            <button id="generate-btn" class="btn-primary" disabled>Generar Copys & Imagen</button>
+            <button class="btn-secondary">Copiar al portapapeles</button>
+          </div>
+        </div>
+      </div>
+  </section>
+
+  <footer>
+    <p>© 2026 IA TOOLS 2.0 | Mauricio Pineda - ProDig</p>
+  </footer>
+</Layout>
+
+<style>
+  .header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 2.5rem;
+  }
+  
+  .logo-icon {
+    background: linear-gradient(135deg, var(--neon-teal), var(--hyper-violet));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.5));
+  }
+  
+  .accent {
+    color: var(--neon-teal);
+    text-shadow: var(--glow-teal);
+  }
+  
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+  }
+
+  .nav-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 4rem;
+    padding: 0.5rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--glass-border);
+    border-radius: 99px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .nav-item {
+    padding: 0.75rem 2rem;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 99px;
+    transition: all 0.3s ease;
+  }
+
+  .nav-item.active {
+    background: var(--neon-teal);
+    color: var(--space-dark);
+    box-shadow: var(--glow-teal);
+  }
+
+  .section {
+    display: none;
+  }
+
+  .section.active {
+    display: block;
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2rem;
+  }
+
+  .badge {
+    display: inline-block;
+    background: var(--hyper-violet);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    box-shadow: var(--glow-violet);
+  }
+
+  .tag {
+    font-size: 0.85rem;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 99px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tag:hover {
+    border-color: var(--neon-teal);
+    color: var(--neon-teal);
+  }
+
+  .btn-primary {
+    background: var(--neon-teal);
+    color: var(--space-dark);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-primary:active {
+    transform: scale(0.95);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-base);
+    border: 1px solid var(--glass-border);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  /* Campaigns Styling */
+  .pubs-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+  }
+
+  .pub-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .pub-option {
+    padding: 1rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+  }
+
+  .pub-option:hover {
+    background: rgba(255,255,255,0.05);
+  }
+
+  .pub-option.selected {
+    border-color: var(--neon-teal);
+    background: rgba(0, 245, 255, 0.1);
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    background: var(--text-muted);
+    border-radius: 50%;
+  }
+
+  .pub-option.selected .dot {
+    background: var(--neon-teal);
+    box-shadow: var(--glow-teal);
+  }
+
+  .post-preview {
+    min-height: 200px;
+    padding: 1.5rem;
+    background: rgba(0,0,0,0.3);
+    border-radius: 1rem;
+    margin: 1.5rem 0;
+    line-height: 1.6;
+    border-left: 4px solid var(--neon-teal);
+  }
+
+  .post-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  @media (max-width: 900px) {
+    .pubs-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Sources Management Styling */
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .source-item {
+    background: rgba(255,255,255,0.03);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .source-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .source-info span {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .status-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .status-badge.online {
+    background: rgba(0, 255, 127, 0.1);
+    color: #00ff7f;
+    border: 1px solid rgba(0, 255, 127, 0.2);
+  }
+
+  .status-badge.offline {
+    background: rgba(255, 69, 58, 0.1);
+    color: #ff453a;
+    border: 1px solid rgba(255, 69, 58, 0.2);
+  }
+
+  /* Skeletons */
+  .skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 4px;
+    height: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .skeleton.title { height: 1.5rem; width: 80%; margin-bottom: 1.5rem; }
+  .skeleton.text { width: 100%; }
+  .skeleton.usecase { width: 60%; margin-top: 2rem; }
+
+  @keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 6rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+</style>
+
+<script>
+  // Simple navigation logic
+  const navButtons = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('.section');
+
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sectionId = `${btn.getAttribute('data-section')}-section`;
+      
+      // Update buttons
+      navButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Update sections
+      sections.forEach(s => s.classList.remove('active'));
+      document.getElementById(sectionId)?.classList.add('active');
+    });
+  });
+
+  // Pub Generation logic
+  const options = document.querySelectorAll('.pub-option');
+  const genBtn = document.getElementById('generate-btn');
+  const preview = document.getElementById('generated-post');
+
+  const copies = {
+    "Gemma 4": "🚀 Google acaba de cambiar las reglas del juego de la IA móvil con Gemma 4.\n\nImagina tener modelos SOTA corriendo localmente en tu iPhone con multimodasidad nativa. 📲 Privacidad total, cero latencia. Este es el principio del fin para las apps que requieren conectividad constante para ser inteligentes.\n\n¿Cómo crees que impactará esto a la seguridad de datos personales?",
+    "Gemini Robotics": "🤖 El futuro de la robótica ya tiene ADN de Google DeepMind.\n\nLa nueva alianza con Boston Dynamics integra Gemini 3 directamente en humanoides, dándoles capacidad de razonamiento lógico y percepción semántica en tiempo real. No es solo un robot moviéndose, es un robot comprendiendo su entorno.\n\n¿Estamos listos para ver IA física en nuestras oficinas?",
+    "AI Social Impact": "🌍 La IA no es solo código, es impacto real.\n\nGoogle anunció una inversión millonaria en el AI Impact Summit para resolver retos de salud y clima. Lo más brutal: el despliegue de modelos locales para detección temprana de enfermedades en zonas sin conectividad.\n\nTecnología con propósito. ¿Qué otro sector debería priorizar la IA?"
+  };
+
+  options.forEach(opt => {
+    opt.addEventListener('click', () => {
+      options.forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      
+      const tech = opt.getAttribute('data-tech');
+      preview.innerHTML = `<p>${copies[tech].replace(/\n/g, '<br>')}</p>`;
+      genBtn.disabled = false;
+    });
+  });
+
+  genBtn.addEventListener('click', () => {
+    genBtn.innerText = "IA Generando...";
+    setTimeout(() => {
+      genBtn.innerText = "Listo para publicar";
+      alert("¡Publicación generada con éxito! La imagen se guardará en tu galería.");
+    }, 1500);
+  });
+</script>

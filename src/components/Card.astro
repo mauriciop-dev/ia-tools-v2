@@ -1,0 +1,142 @@
+---
+interface Props {
+  title: string;
+  summary: string;
+  technology: string;
+  use_cases: string[];
+  is_new?: boolean;
+  platform?: 'X' | 'YouTube';
+}
+
+const { title, summary, technology, use_cases, is_new = false, platform } = Astro.props;
+---
+
+<div class="glass-card card-item">
+  {is_new && <span class="badge">NUEVO</span>}
+  <header>
+    <div class="tech-tag">{technology}</div>
+    <h3>{title}</h3>
+  </header>
+  
+  <p class="summary">{summary}</p>
+
+  <div class="use-cases">
+    <h4>💡 Casos de Uso:</h4>
+    <ul>
+      {use_cases.map(useCase => (
+        <li>{useCase}</li>
+      ))}
+    </ul>
+  </div>
+
+  <footer class="card-footer">
+     {platform && <span class={`platform ${platform.toLowerCase()}`}>{platform} Source</span>}
+     <button class="btn-secondary">Ver Publicación</button>
+  </footer>
+</div>
+
+<style>
+  .card-item {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    animation: slideIn 0.5s ease-out backwards;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .tech-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--neon-teal);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+
+  h3 {
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+    font-size: 1.4rem;
+    background: linear-gradient(to bottom right, white, var(--text-muted));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .summary {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    flex-grow: 1;
+  }
+
+  .use-cases {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1.25rem;
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  h4 {
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+    color: var(--neon-teal);
+  }
+
+  ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  li {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    position: relative;
+    padding-left: 1rem;
+    opacity: 0.9;
+  }
+
+  li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--neon-teal);
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+  }
+
+  .platform {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    background: var(--glass-bg);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--neon-teal);
+    color: var(--neon-teal);
+    padding: 0.6rem 1.2rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(0, 245, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+  }
+</style>

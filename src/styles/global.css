@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@300;400;600;700&display=swap');
+
+:root {
+  /* Colors */
+  --space-dark: #0B0F19;
+  --space-deep: #05070A;
+  --neon-teal: #00F5FF;
+  --hyper-violet: #9D00FF;
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-hover-bg: rgba(255, 255, 255, 0.07);
+  --text-primary: #EEF2FF;
+  --text-muted: #94A3B8;
+
+  /* Fonts */
+  --font-main: 'Inter', sans-serif;
+  --font-display: 'Outfit', sans-serif;
+
+  /* Effects */
+  --glow-teal: 0 0 20px rgba(0, 245, 255, 0.3);
+  --glow-violet: 0 0 25px rgba(157, 0, 255, 0.3);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--space-dark);
+  background-image: 
+    radial-gradient(circle at 0% 0%, rgba(157, 0, 255, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(0, 245, 255, 0.1) 0%, transparent 40%);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Glassmorphism Classes */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: var(--glass-hover-bg);
+  border-color: var(--neon-teal);
+  transform: translateY(-5px);
+  box-shadow: var(--glow-teal);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--space-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neon-teal);
+}
