@@ -532,11 +532,19 @@ const displayNews = news.length > 0 ? news : [
       const copyBtn = document.getElementById('copy-btn');
       const downloadLink = document.getElementById('download-link');
       
-      let imagePath = '/campaigns/gemma_4.png'; // Default for demo
-      // In production, we'd have unique paths per news.id
+      let imagePath = '/campaigns/gemma_4.png';
+      
+      // Dynamic logic for assets
+      if (tech.toLowerCase().includes('gemma')) {
+        imagePath = '/campaigns/gemma_4.png';
+      } else if (tech.toLowerCase().includes('atlas')) {
+        imagePath = 'https://placehold.co/600x400/000000/00f5ff?text=Atlas+x+Gemini';
+      } else {
+        imagePath = `https://placehold.co/600x400/0b0b14/f500ff?text=${tech.replace(/ /g, '+')}`;
+      }
       
       preview.innerHTML = `
-        <img src="${imagePath}" alt="AI Campaign Asset" class="img-campaign" onerror="this.src='https://placehold.co/600x400/000000/00f5ff?text=IA+Asset+Generado'"/>
+        <img src="${imagePath}" alt="AI Campaign Asset" class="img-campaign" />
         <p>${copy.replace(/\n/g, '<br>')}</p>
       `;
 
