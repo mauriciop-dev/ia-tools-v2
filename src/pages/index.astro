@@ -1,6 +1,31 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Card from '../components/Card.astro';
+import { supabase } from '../lib/supabase';
+
+// Fetch Sources
+const { data: sources = [] } = await supabase
+  .from('sources')
+  .select('*')
+  .order('name');
+
+// Fetch News
+const { data: news = [] } = await supabase
+  .from('news')
+  .select('*')
+  .order('created_at', { ascending: false });
+
+// Fallback if no news found
+const displayNews = news.length > 0 ? news : [
+  {
+    title: "Gemma 4 en iPhone: IA Local Avanzada",
+    summary: "Google ha habilitado la ejecución de modelos Gemma 4 directamente en dispositivos iOS mediante la app AI Edge Gallery, permitiendo inferencia privada y offline.",
+    technology: "Gemma 4 / Mobile AI",
+    use_cases: ["Asistentes privados con datos sensibles.", "IA funcional en zonas sin conectividad."],
+    is_new: true,
+    platform: "X"
+  }
+];
 ---
 
 <Layout title="Dashboard" description="Control center for IA Tools 2.0 - Tracking Google & AI industry">
@@ -22,62 +47,25 @@ import Card from '../components/Card.astro';
     <div class="section-header">
       <h2>Descubrimientos de Hoy</h2>
       <div class="filters">
-        <span class="tag">Todos</span>
-        <span class="tag">Google</span>
-        <span class="tag">AI Research</span>
+      <div class="filters">
+        <span class="tag active" data-filter="all">Todos</span>
+        <span class="tag" data-filter="Google">Google</span>
+        <span class="tag" data-filter="AI Research">AI Research</span>
+      </div>
       </div>
     </div>
     
     <div class="grid">
-      <Card 
-        title="Gemma 4 en iPhone: IA Local Avanzada"
-        summary="Google ha habilitado la ejecución de modelos Gemma 4 directamente en dispositivos iOS mediante la app AI Edge Gallery, permitiendo inferencia privada y offline."
-        technology="Gemma 4 / Mobile AI"
-        use_cases={[
-          "Asistentes privados con datos sensibles.",
-          "IA funcional en zonas sin conectividad.",
-          "Apps de baja latencia para juegos y AR."
-        ]}
-        is_new={true}
-        platform="X"
-      />
-      
-      <Card 
-        title="Guía Visual de Arquitectura Gemma 4"
-        summary="Se ha publicado un desglose detallado de cómo Gemma 4 procesa entradas multimodales (texto, imagen, audio) en sus variantes más optimizadas."
-        technology="Deep Learning"
-        use_cases={[
-          "Material educativo para ingenieros de ML.",
-          "Referencia de optimización para devs.",
-          "Comparativa arquitectónica de modelos abiertos."
-        ]}
-        is_new={true}
-        platform="X"
-      />
-
-      <Card 
-        title="Gemini Enterprise: IA para Corporativos"
-        summary="Google Cloud presenta nuevas capacidades de Gemini enfocadas en privacidad de datos empresariales e integración profunda con Google Workspace."
-        technology="Gemini / Enterprise"
-        use_cases={[
-          "Generación automatizada de reportes internos.",
-          "Búsqueda segura en bases de conocimiento corporativas.",
-          "Resúmenes ejecutivos con planes de acción."
-        ]}
-        platform="YouTube"
-      />
-
-      <Card 
-        title="AI Impact Summit 2026: Inversión Social"
-        summary="Google anuncia un fondo de $50M para proyectos de IA con impacto social, centrándose en salud global y sostenibilidad ambiental."
-        technology="Social Impact AI"
-        use_cases={[
-          "Detección temprana de enfermedades en zonas rurales.",
-          "Modelado climático predictivo para agricultura.",
-          "Optimización de recursos energéticos urbanos."
-        ]}
-        platform="YouTube"
-      />
+      {displayNews.map((item) => (
+        <Card 
+          title={item.title}
+          summary={item.summary}
+          technology={item.technology}
+          use_cases={item.use_cases}
+          is_new={item.is_new}
+          platform={item.platform}
+        />
+      ))}
     </div>
   </section>
 
@@ -85,37 +73,42 @@ import Card from '../components/Card.astro';
     <div class="glass-card">
       <div class="section-header">
         <h2>Gestionar Fuentes</h2>
-        <button class="btn-primary">+ Añadir Fuente</button>
+        <button id="add-source-btn" class="btn-primary">+ Añadir Fuente</button>
+      </div>
+
+      <!-- Add Source Modal simulation -->
+      <div id="source-form" class="glass-card hidden" style="margin-bottom: 2rem;">
+        <div style="display: flex; gap: 1rem; align-items: flex-end;">
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem;">Nombre de la Fuente</label>
+            <input type="text" id="source-name" placeholder="Ej: Google Gemma" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); padding: 0.75rem; border-radius: 0.5rem; color: white;">
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; font-size: 0.8rem; margin-bottom: 0.5rem;">URL</label>
+            <input type="text" id="source-url" placeholder="https://x.com/..." style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); padding: 0.75rem; border-radius: 0.5rem; color: white;">
+          </div>
+          <button id="save-source" class="btn-primary" style="height: 48px;">Guardar</button>
+        </div>
       </div>
       <div class="sources-grid">
-        <div class="source-item">
-          <div class="source-info">
-            <strong>Gemma 4 (Official)</strong>
-            <span>x.com/googlegemma</span>
+        {sources.map((source) => (
+          <div class="source-item">
+            <div class="source-info">
+              <strong>{source.name}</strong>
+              <span>{source.url.replace('https://', '')}</span>
+            </div>
+            <div class="source-actions">
+              <button class="btn-icon" title="Pausar/Activar">
+                {source.is_active ? '⏸' : '▶'}
+              </button>
+              <button class="btn-icon" title="Editar">✏️</button>
+              <button class="btn-icon danger" title="Eliminar">🗑️</button>
+            </div>
+            <span class={`status-badge ${source.is_active ? 'online' : 'offline'}`}>
+              {source.is_active ? 'Activo' : 'Pausado'}
+            </span>
           </div>
-          <span class="status-badge online">Activo</span>
-        </div>
-        <div class="source-item">
-          <div class="source-info">
-            <strong>Google DeepMind</strong>
-            <span>x.com/googledeepmind</span>
-          </div>
-          <span class="status-badge online">Activo</span>
-        </div>
-        <div class="source-item">
-          <div class="source-info">
-            <strong>Google Cloud Tech</strong>
-            <span>youtube.com/@googlecloudtech</span>
-          </div>
-          <span class="status-badge online">Activo</span>
-        </div>
-        <div class="source-item">
-          <div class="source-info">
-            <strong>NotebookLM</strong>
-            <span>x.com/notebooklm</span>
-          </div>
-          <div class="status-badge offline">Pausado</div>
-        </div>
+        ))}
       </div>
     </div>
   </section>
@@ -128,18 +121,12 @@ import Card from '../components/Card.astro';
         <div class="glass-card pub-selector">
           <h3>1. Selecciona Tecnología</h3>
           <div class="pub-options">
-            <div class="pub-option" data-tech="Gemma 4">
-              <span class="dot"></span>
-              Gemma 4 en iPhone
-            </div>
-            <div class="pub-option" data-tech="Gemini Robotics">
-              <span class="dot"></span>
-              Google DeepMind DNA en Robots
-            </div>
-            <div class="pub-option" data-tech="AI Social Impact">
-              <span class="dot"></span>
-              AI Impact Summit (Google)
-            </div>
+            {displayNews.map((item) => (
+              <div class="pub-option" data-tech={item.title} data-summary={item.summary}>
+                <span class="dot"></span>
+                {item.title}
+              </div>
+            ))}
           </div>
         </div>
 
@@ -150,7 +137,8 @@ import Card from '../components/Card.astro';
           </div>
           <div class="post-actions">
             <button id="generate-btn" class="btn-primary" disabled>Generar Copys & Imagen</button>
-            <button class="btn-secondary">Copiar al portapapeles</button>
+            <button id="copy-btn" class="btn-secondary" disabled>Copiar al portapapeles</button>
+            <a id="download-link" href="#" download="campaña_ia.png" class="btn-secondary" style="display: none; align-items: center; justify-content: center;">Descargar Imagen</a>
           </div>
         </div>
       </div>
@@ -224,6 +212,33 @@ import Card from '../components/Card.astro';
     background: var(--neon-teal);
     color: var(--space-dark);
     box-shadow: var(--glow-teal);
+  }
+
+  .hidden { display: none !important; }
+
+  .btn-icon {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-base);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+  }
+
+  .btn-icon:hover { border-color: var(--neon-teal); }
+  .btn-icon.danger:hover { border-color: #ff453a; color: #ff453a; }
+
+  .source-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .tag.active {
+    background: var(--hyper-violet);
+    border-color: var(--hyper-violet);
+    color: white;
   }
 
   .section {
@@ -356,6 +371,16 @@ import Card from '../components/Card.astro';
     border-left: 4px solid var(--neon-teal);
   }
 
+  .img-campaign {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.2);
+    border: 1px solid var(--glass-border);
+  }
+
   .post-actions {
     display: flex;
     gap: 1rem;
@@ -478,7 +503,20 @@ import Card from '../components/Card.astro';
       opt.classList.add('selected');
       
       const tech = opt.getAttribute('data-tech');
-      preview.innerHTML = `<p>${copies[tech].replace(/\n/g, '<br>')}</p>`;
+      const summary = opt.getAttribute('data-summary') || '';
+      
+      // Basic AI prompt simulation for copy generation
+      const copy = `🚀 **${tech}**\n\n${summary}\n\nEste avance es clave para el ecosistema de IA. ¿Qué opinas de este impacto?\n\n#IA #Google #TechTrends`;
+      
+      let imageHtml = '';
+      if (tech.includes('Gemma 4')) {
+        imageHtml = `<img src="/campaigns/gemma_4.png" alt="Gemma 4 Campaign" class="img-campaign" />`;
+      }
+      
+      preview.innerHTML = `
+        ${imageHtml}
+        <p>${copy.replace(/\n/g, '<br>')}</p>
+      `;
       genBtn.disabled = false;
     });
   });
@@ -486,8 +524,78 @@ import Card from '../components/Card.astro';
   genBtn.addEventListener('click', () => {
     genBtn.innerText = "IA Generando...";
     setTimeout(() => {
-      genBtn.innerText = "Listo para publicar";
-      alert("¡Publicación generada con éxito! La imagen se guardará en tu galería.");
+      genBtn.innerText = "Campaña Lista";
+      const copyBtn = document.getElementById('copy-btn');
+      const downloadLink = document.getElementById('download-link');
+      
+      if (copyBtn) copyBtn.disabled = false;
+      
+      // Handle download if Gemma image is present
+      const img = preview.querySelector('img');
+      if (img && downloadLink) {
+        downloadLink.href = img.src;
+        downloadLink.style.display = 'flex';
+      }
+      
+      alert("¡Campaña generada con éxito! Ya puedes copiar el copy y descargar la imagen.");
     }, 1500);
+  });
+
+  // Copy to clipboard
+  const copyBtn = document.getElementById('copy-btn');
+  copyBtn.addEventListener('click', () => {
+    const text = preview.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      copyBtn.innerText = "¡Copiado!";
+      setTimeout(() => copyBtn.innerText = "Copiar al portapapeles", 2000);
+    });
+  });
+
+  // Nav from Card to Pub
+  document.addEventListener('click', (e) => {
+    const pubTitle = e.target.getAttribute('data-goto-pub');
+    if (pubTitle) {
+      // 1. Change to Pub section
+      const pubTab = document.querySelector('[data-section="pubs"]');
+      pubTab.click();
+
+      // 2. Select the specific pub in the selector
+      const opt = document.querySelector(`.pub-option[data-tech="${pubTitle}"]`);
+      if (opt) opt.click();
+    }
+  });
+
+  // Filtering Logic
+  const filterTags = document.querySelectorAll('.tag');
+  filterTags.forEach(tag => {
+    tag.addEventListener('click', () => {
+      filterTags.forEach(t => t.classList.remove('active'));
+      tag.classList.add('active');
+      const filter = tag.getAttribute('data-filter').toLowerCase();
+      
+      const cards = document.querySelectorAll('.card-item');
+      cards.forEach(card => {
+        const title = card.querySelector('h3').innerText.toLowerCase();
+        const tech = card.querySelector('.tech-tag').innerText.toLowerCase();
+        
+        if (filter === 'all' || title.includes(filter) || tech.includes(filter)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  // Fuentes Logic
+  const addSourceBtn = document.getElementById('add-source-btn');
+  const sourceForm = document.getElementById('source-form');
+  addSourceBtn.addEventListener('click', () => {
+    sourceForm.classList.toggle('hidden');
+  });
+
+  document.getElementById('save-source')?.addEventListener('click', () => {
+     alert("Enviando nueva fuente a Supabase... (Simulación)");
+     sourceForm.classList.add('hidden');
   });
 </script>

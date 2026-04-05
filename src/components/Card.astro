@@ -31,7 +31,7 @@ const { title, summary, technology, use_cases, is_new = false, platform } = Astr
 
   <footer class="card-footer">
      {platform && <span class={`platform ${platform.toLowerCase()}`}>{platform} Source</span>}
-     <button class="btn-secondary">Ver Publicación</button>
+     <button class="btn-secondary" data-goto-pub={title}>Ver Publicación</button>
   </footer>
 </div>
 

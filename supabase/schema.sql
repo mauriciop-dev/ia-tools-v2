@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS sources (
 CREATE TABLE IF NOT EXISTS news (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     source_id UUID REFERENCES sources(id) ON DELETE SET NULL,
-    title TEXT NOT NULL,
+    title TEXT UNIQUE NOT NULL,
     summary TEXT NOT NULL,
     technology TEXT NOT NULL,
     use_cases JSONB NOT NULL DEFAULT '[]',
