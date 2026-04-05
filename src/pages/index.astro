@@ -505,39 +505,49 @@ const displayNews = news.length > 0 ? news : [
       const tech = opt.getAttribute('data-tech');
       const summary = opt.getAttribute('data-summary') || '';
       
-      // Basic AI prompt simulation for copy generation
-      const copy = `🚀 **${tech}**\n\n${summary}\n\nEste avance es clave para el ecosistema de IA. ¿Qué opinas de este impacto?\n\n#IA #Google #TechTrends`;
-      
-      let imageHtml = '';
-      if (tech.includes('Gemma 4')) {
-        imageHtml = `<img src="/campaigns/gemma_4.png" alt="Gemma 4 Campaign" class="img-campaign" />`;
-      }
-      
-      preview.innerHTML = `
-        ${imageHtml}
-        <p>${copy.replace(/\n/g, '<br>')}</p>
-      `;
+      // Clear preview and reset buttons when changing tech
+      preview.innerHTML = `<p class="text-muted">Presiona 'Generar' para crear el post de: <strong>${tech}</strong></p>`;
       genBtn.disabled = false;
+      genBtn.innerText = "Generar Copys & Imagen";
+      document.getElementById('copy-btn').disabled = true;
+      document.getElementById('download-link').style.display = 'none';
+      
+      opt.dataset.ready_copy = `🚀 **${tech}**\n\n${summary}\n\nEste avance es clave para el ecosistema de IA. ¿Qué opinas de este impacto?\n\n#IA #Google #TechTrends`;
     });
   });
 
   genBtn.addEventListener('click', () => {
+    const selected = document.querySelector('.pub-option.selected');
+    if (!selected) return;
+
     genBtn.innerText = "IA Generando...";
+    genBtn.disabled = true;
+
     setTimeout(() => {
       genBtn.innerText = "Campaña Lista";
+      genBtn.disabled = false;
+      const tech = selected.getAttribute('data-tech');
+      const copy = selected.dataset.ready_copy;
+      
       const copyBtn = document.getElementById('copy-btn');
       const downloadLink = document.getElementById('download-link');
       
+      let imagePath = '/campaigns/gemma_4.png'; // Default for demo
+      // In production, we'd have unique paths per news.id
+      
+      preview.innerHTML = `
+        <img src="${imagePath}" alt="AI Campaign Asset" class="img-campaign" onerror="this.src='https://placehold.co/600x400/000000/00f5ff?text=IA+Asset+Generado'"/>
+        <p>${copy.replace(/\n/g, '<br>')}</p>
+      `;
+
       if (copyBtn) copyBtn.disabled = false;
       
-      // Handle download if Gemma image is present
-      const img = preview.querySelector('img');
-      if (img && downloadLink) {
-        downloadLink.href = img.src;
+      if (downloadLink) {
+        downloadLink.href = imagePath;
         downloadLink.style.display = 'flex';
       }
       
-      alert("¡Campaña generada con éxito! Ya puedes copiar el copy y descargar la imagen.");
+      alert("¡Campaña generada con éxito! Ya puedes copiar el texto y descargar tu imagen premium.");
     }, 1500);
   });
 
