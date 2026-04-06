@@ -16,7 +16,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function searchWithBrave(query) {
   try {
     const response = await fetch(
-      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=3`,
+      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=3&country=CO&locale=es-ES`,
       {
         headers: {
           'X-Subscription-Token': BRAVE_API_KEY,
@@ -68,16 +68,16 @@ async function runScraper() {
     const result = await searchWithBrave(`${source.name} AI latest 2026`);
     
     if (result) {
-      const discoveredNews = {
-        source_id: source.id,
-        title: result.title,
-        summary: result.description?.substring(0, 500) || `Latest updates from ${source.name}`,
-        technology: source.name.includes('Google') ? 'Google AI' : 'Open Source AI',
-        use_cases: ['AI research', 'Development'],
-        platform: source.platform,
-        is_new: true,
-        published_at: now.toISOString()
-      };
+        const discoveredNews = {
+          source_id: source.id,
+          title: result.title,
+          summary: result.description?.substring(0, 500) || `Últimas actualizaciones de ${source.name}`,
+          technology: source.name.includes('Google') ? 'Google AI' : 'Open Source AI',
+          use_cases: ['Investigación de IA', 'Desarrollo tecnológico'],
+          platform: source.platform,
+          is_new: true,
+          published_at: now.toISOString()
+        };
 
       const { error: newsError } = await supabase
         .from('news')

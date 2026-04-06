@@ -25,9 +25,9 @@ export async function runScraper() {
     }
 
     try {
-      const searchQuery = `${sourceName} AI news`;
+      const searchQuery = `${sourceName} últimas noticias IA`;
       const response = await fetch(
-        `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(searchQuery)}&count=5`,
+        `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(searchQuery)}&count=5&country=CO&locale=es-ES`,
         {
           headers: {
             'X-Subscription-Token': BRAVE_API_KEY,
@@ -51,10 +51,10 @@ export async function runScraper() {
           .from('news')
           .upsert({
             source_id: source.id,
-            title: latest.title || `${sourceName} updates`,
-            summary: latest.description || `Latest updates from ${sourceName}`,
-            technology: sourceName.includes('Google') ? 'Google AI' : 'AI',
-            use_cases: ['AI research', 'Development'],
+            title: latest.title || `${sourceName} actualizaciones`,
+            summary: latest.description || `Últimas actualizaciones de ${sourceName}`,
+            technology: sourceName.includes('Google') ? 'Google AI' : 'IA de Código Abierto',
+            use_cases: ['Investigación de IA', 'Desarrollo tecnológico'],
             platform: source.platform,
             is_new: true,
             published_at: new Date().toISOString()
