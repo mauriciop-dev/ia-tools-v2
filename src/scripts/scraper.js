@@ -13,6 +13,29 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+function cleanHtml(text) {
+  if (!text) return '';
+  return text
+    .replace(/<[^>]*>/g, '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#x27;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function truncateSpanish(text, maxLength = 400) {
+  if (!text) return '';
+  const cleaned = cleanHtml(text);
+  if (cleaned.length <= maxLength) return cleaned;
+  return cleaned.substring(0, maxLength).lastIndexOf(' ') > 0 
+    ? cleaned.substring(0, maxLength).lastIndexOf(' ') + '...'
+    : cleaned.substring(0, maxLength) + '...';
+}
+
 async function searchWithBrave(query) {
   try {
     const response = await fetch(
@@ -39,7 +62,7 @@ async function searchWithBrave(query) {
 }
 
 async function runScraper() {
-  console.log('--- Starting Daily AI Scraper with Brave Search ---');
+  console.log('--- AI Scraper: Buscando y limpiando contenido en español ---');
   
   const { data: sources, error: sourcesError } = await supabase
     .from('sources')
@@ -65,19 +88,30 @@ async function runScraper() {
       continue;
     }
 
-    const result = await searchWithBrave(`${source.name} AI latest 2026`);
+    const result = await searchWithBrave(`${source.name} inteligencia artificial últimas noticias`);
     
     if (result) {
-        const discoveredNews = {
-          source_id: source.id,
-          title: result.title,
-          summary: result.description?.substring(0, 500) || `Últimas actualizaciones de ${source.name}`,
-          technology: source.name.includes('Google') ? 'Google AI' : 'Open Source AI',
-          use_cases: ['Investigación de IA', 'Desarrollo tecnológico'],
-          platform: source.platform,
-          is_new: true,
-          published_at: now.toISOString()
-        };
+      const cleanTitle = cleanHtml(result.title);
+      const cleanSummary = truncateSpanish(result.description);
+      
+      const technology = source.name.includes('Google') 
+        ? 'Ecosistema Google AI' 
+        : source.name.includes('Cloudflare')
+          ? 'Infraestructura Cloud'
+          : source.name.includes('OpenRouter')
+            ? 'Modelos Abiertos'
+            : 'IA de Código Abierto';
+
+      const discoveredNews = {
+        source_id: source.id,
+        title: cleanTitle,
+        summary: cleanSummary || `Últimas actualizaciones de ${source.name} en inteligencia artificial.`,
+        technology: technology,
+        use_cases: ['Investigación de IA', 'Desarrollo tecnológico', 'Innovación digital'],
+        platform: source.platform,
+        is_new: true,
+        published_at: now.toISOString()
+      };
 
       const { error: newsError } = await supabase
         .from('news')
@@ -90,7 +124,7 @@ async function runScraper() {
           console.error(`  Error saving news:`, newsError.message);
         }
       } else {
-        console.log(`  ✓ Saved: ${result.title.substring(0, 50)}...`);
+        console.log(`  ✓ Saved: ${cleanTitle.substring(0, 50)}...`);
       }
 
       await supabase
