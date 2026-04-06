@@ -35,7 +35,6 @@ function isEnglish(text) {
 async function translateToSpanish(text) {
   if (!text || text.length < 10) return text;
   if (!isEnglish(text)) return text;
-  
   if (!OPENROUTER_API_KEY) return text;
   
   try {
@@ -46,12 +45,9 @@ async function translateToSpanish(text) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'google/gemma-3n-e4b-it:free',
-        messages: [
-          { role: 'system', content: 'Traduce al español de manera natural y profesional.' },
-          { role: 'user', content: text }
-        ],
-        max_tokens: 500
+        model: 'google/gemma-2-9b-it',
+        messages: [{ role: 'user', content: `Traduce al español: "${text}"` }],
+        max_tokens: 600
       })
     });
 

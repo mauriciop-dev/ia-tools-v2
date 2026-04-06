@@ -48,52 +48,52 @@ async function translateToSpanish(text) {
   if (!isEnglish(text)) return text;
   
   if (!OPENROUTER_API_KEY) {
-    console.log('  ⚠ No OpenRouter API key, keeping original language');
+    console.log('  ⚠ No OpenRouter API key');
     return text;
   }
   
   try {
+    console.log('  🌐 Translating...');
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://ia-tools-v2.vercel.app',
-        'X-Title': 'IA Tools Scraper'
+        'X-Title': 'IA Tools'
       },
       body: JSON.stringify({
-        model: 'google/gemma-3n-e4b-it:free',
+        model: 'google/gemma-2-9b-it',
         messages: [
-          {
-            role: 'system',
-            content: 'Traduce el siguiente texto al español de manera natural y profesional. Solo devuelve la traducción, sin comentarios.'
-          },
-          {
-            role: 'user',
-            content: text
-          }
+          { role: 'user', content: `Traduce al español: "${text}"` }
         ],
-        max_tokens: 500
+        max_tokens: 600
       })
     });
 
+    console.log('  🌐 Status:', response.status);
+    
     if (!response.ok) {
-      console.log('  ⚠ Translation API error, keeping original');
+      console.log('  ⚠ API error, skipping translation');
       return text;
     }
 
     const data = await response.json();
-    return data.choices?.[0]?.message?.content?.trim() || text;
+    const translated = data.choices?.[0]?.message?.content?.trim();
+    console.log('  🌐 Translated:', translated?.substring(0, 60));
+    return translated || text;
   } catch (err) {
-    console.log('  ⚠ Translation failed:', err.message);
+    console.log('  ⚠ Error:', err.message);
     return text;
   }
 }
 
 async function searchWithBrave(query) {
   try {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     const response = await fetch(
-      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=5&country=CO&locale=es-ES&extra_filter=type:news`,
+      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=3`,
       {
         headers: {
           'X-Subscription-Token': BRAVE_API_KEY,
