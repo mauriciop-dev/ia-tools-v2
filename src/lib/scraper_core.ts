@@ -73,6 +73,17 @@ export async function runScraper() {
         const cleanTitle = cleanHtml(latest.title);
         const cleanSummary = truncateSpanish(latest.description);
 
+        const isEnglish = !cleanTitle.includes('á') && !cleanTitle.includes('é') && !cleanTitle.includes('í') && 
+                          !cleanTitle.includes('ó') && !cleanTitle.includes('ú') && !cleanTitle.includes('ñ');
+        
+        const finalTitle = isEnglish && cleanTitle.length > 0 
+          ? `${sourceName}: ${cleanTitle.substring(0, 60)}`
+          : cleanTitle || `Últimas noticias de ${sourceName}`;
+        
+        const finalSummary = isEnglish && cleanSummary.length > 0
+          ? cleanSummary.substring(0, 300) + '...'
+          : cleanSummary || `Conoce las últimas actualizaciones en inteligencia artificial de ${sourceName}.`;
+
         const technology = sourceName.includes('Google') 
           ? 'Ecosistema Google AI' 
           : sourceName.includes('Cloudflare')
@@ -85,8 +96,8 @@ export async function runScraper() {
           .from('news')
           .upsert({
             source_id: source.id,
-            title: cleanTitle,
-            summary: cleanSummary || `Últimas actualizaciones de ${sourceName} en inteligencia artificial.`,
+            title: finalTitle,
+            summary: finalSummary,
             technology: technology,
             use_cases: ['Investigación de IA', 'Desarrollo tecnológico', 'Innovación digital'],
             platform: source.platform,

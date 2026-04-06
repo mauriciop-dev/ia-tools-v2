@@ -39,7 +39,7 @@ function truncateSpanish(text, maxLength = 400) {
 async function searchWithBrave(query) {
   try {
     const response = await fetch(
-      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=3&country=CO&locale=es-ES`,
+      `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=5&country=CO&locale=es-ES&extra_filter=type:news`,
       {
         headers: {
           'X-Subscription-Token': BRAVE_API_KEY,
@@ -54,7 +54,13 @@ async function searchWithBrave(query) {
     }
     
     const data = await response.json();
-    return data.web?.results?.[0] || null;
+    const results = data.web?.results || [];
+    
+    const spanishResult = results.find(r => 
+      r.url?.includes('.co') || r.url?.includes('es') || r.language === 'es'
+    );
+    
+    return spanishResult || results[0] || null;
   } catch (err) {
     console.error('Brave search error:', err.message);
     return null;
@@ -94,6 +100,17 @@ async function runScraper() {
       const cleanTitle = cleanHtml(result.title);
       const cleanSummary = truncateSpanish(result.description);
       
+      const isEnglish = !cleanTitle.includes('á') && !cleanTitle.includes('é') && !cleanTitle.includes('í') && 
+                        !cleanTitle.includes('ó') && !cleanTitle.includes('ú') && !cleanTitle.includes('ñ');
+      
+      const finalTitle = isEnglish && cleanTitle.length > 0 
+        ? `${source.name}: ${cleanTitle.substring(0, 60)}`
+        : cleanTitle || `Últimas noticias de ${source.name}`;
+      
+      const finalSummary = isEnglish && cleanSummary.length > 0
+        ? cleanSummary.substring(0, 300) + '...'
+        : cleanSummary || `Conoce las últimas actualizaciones en inteligencia artificial de ${source.name}.`;
+      
       const technology = source.name.includes('Google') 
         ? 'Ecosistema Google AI' 
         : source.name.includes('Cloudflare')
@@ -104,8 +121,8 @@ async function runScraper() {
 
       const discoveredNews = {
         source_id: source.id,
-        title: cleanTitle,
-        summary: cleanSummary || `Últimas actualizaciones de ${source.name} en inteligencia artificial.`,
+        title: finalTitle,
+        summary: finalSummary,
         technology: technology,
         use_cases: ['Investigación de IA', 'Desarrollo tecnológico', 'Innovación digital'],
         platform: source.platform,
