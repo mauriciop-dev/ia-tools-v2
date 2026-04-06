@@ -5,6 +5,7 @@ dotenv.config();
 const supabaseUrl = process.env.PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const BRAVE_API_KEY = process.env.BRAVE_API_KEY;
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('Missing Supabase variables');
@@ -34,6 +35,59 @@ function truncateSpanish(text, maxLength = 400) {
   return cleaned.substring(0, maxLength).lastIndexOf(' ') > 0 
     ? cleaned.substring(0, maxLength).lastIndexOf(' ') + '...'
     : cleaned.substring(0, maxLength) + '...';
+}
+
+function isEnglish(text) {
+  return !text.includes('á') && !text.includes('é') && !text.includes('í') && 
+         !text.includes('ó') && !text.includes('ú') && !text.includes('ñ') &&
+         !text.includes('¡') && !text.includes('¿');
+}
+
+async function translateToSpanish(text) {
+  if (!text || text.length < 10) return text;
+  if (!isEnglish(text)) return text;
+  
+  if (!OPENROUTER_API_KEY) {
+    console.log('  ⚠ No OpenRouter API key, keeping original language');
+    return text;
+  }
+  
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://ia-tools-v2.vercel.app',
+        'X-Title': 'IA Tools Scraper'
+      },
+      body: JSON.stringify({
+        model: 'google/gemma-3n-e4b-it:free',
+        messages: [
+          {
+            role: 'system',
+            content: 'Traduce el siguiente texto al español de manera natural y profesional. Solo devuelve la traducción, sin comentarios.'
+          },
+          {
+            role: 'user',
+            content: text
+          }
+        ],
+        max_tokens: 500
+      })
+    });
+
+    if (!response.ok) {
+      console.log('  ⚠ Translation API error, keeping original');
+      return text;
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content?.trim() || text;
+  } catch (err) {
+    console.log('  ⚠ Translation failed:', err.message);
+    return text;
+  }
 }
 
 async function searchWithBrave(query) {
@@ -68,7 +122,7 @@ async function searchWithBrave(query) {
 }
 
 async function runScraper() {
-  console.log('--- AI Scraper: Buscando y limpiando contenido en español ---');
+  console.log('--- AI Scraper: Buscando y traduciendo contenido al español ---');
   
   const { data: sources, error: sourcesError } = await supabase
     .from('sources')
@@ -97,19 +151,16 @@ async function runScraper() {
     const result = await searchWithBrave(`${source.name} inteligencia artificial últimas noticias`);
     
     if (result) {
-      const cleanTitle = cleanHtml(result.title);
-      const cleanSummary = truncateSpanish(result.description);
+      let cleanTitle = cleanHtml(result.title);
+      let cleanSummary = truncateSpanish(result.description);
       
-      const isEnglish = !cleanTitle.includes('á') && !cleanTitle.includes('é') && !cleanTitle.includes('í') && 
-                        !cleanTitle.includes('ó') && !cleanTitle.includes('ú') && !cleanTitle.includes('ñ');
+      console.log(`  📰 Found: ${cleanTitle.substring(0, 50)}...`);
       
-      const finalTitle = isEnglish && cleanTitle.length > 0 
-        ? `${source.name}: ${cleanTitle.substring(0, 60)}`
-        : cleanTitle || `Últimas noticias de ${source.name}`;
-      
-      const finalSummary = isEnglish && cleanSummary.length > 0
-        ? cleanSummary.substring(0, 300) + '...'
-        : cleanSummary || `Conoce las últimas actualizaciones en inteligencia artificial de ${source.name}.`;
+      if (isEnglish(cleanTitle) || isEnglish(cleanSummary)) {
+        console.log(`  🌐 Translating to Spanish...`);
+        cleanTitle = await translateToSpanish(cleanTitle);
+        cleanSummary = await translateToSpanish(cleanSummary);
+      }
       
       const technology = source.name.includes('Google') 
         ? 'Ecosistema Google AI' 
@@ -121,8 +172,8 @@ async function runScraper() {
 
       const discoveredNews = {
         source_id: source.id,
-        title: finalTitle,
-        summary: finalSummary,
+        title: cleanTitle,
+        summary: cleanSummary || `Últimas actualizaciones de ${source.name} en inteligencia artificial.`,
         technology: technology,
         use_cases: ['Investigación de IA', 'Desarrollo tecnológico', 'Innovación digital'],
         platform: source.platform,

@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 
 const BRAVE_API_KEY = import.meta.env.BRAVE_API_KEY;
+const OPENROUTER_API_KEY = import.meta.env.OPENROUTER_API_KEY;
 
 function cleanHtml(text) {
   if (!text) return '';
@@ -23,6 +24,43 @@ function truncateSpanish(text, maxLength = 400) {
   return cleaned.substring(0, maxLength).lastIndexOf(' ') > 0 
     ? cleaned.substring(0, maxLength).lastIndexOf(' ') + '...'
     : cleaned.substring(0, maxLength) + '...';
+}
+
+function isEnglish(text) {
+  return !text.includes('á') && !text.includes('é') && !text.includes('í') && 
+         !text.includes('ó') && !text.includes('ú') && !text.includes('ñ') &&
+         !text.includes('¡') && !text.includes('¿');
+}
+
+async function translateToSpanish(text) {
+  if (!text || text.length < 10) return text;
+  if (!isEnglish(text)) return text;
+  
+  if (!OPENROUTER_API_KEY) return text;
+  
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'google/gemma-3n-e4b-it:free',
+        messages: [
+          { role: 'system', content: 'Traduce al español de manera natural y profesional.' },
+          { role: 'user', content: text }
+        ],
+        max_tokens: 500
+      })
+    });
+
+    if (!response.ok) return text;
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content?.trim() || text;
+  } catch {
+    return text;
+  }
 }
 
 export async function runScraper() {
@@ -68,21 +106,13 @@ export async function runScraper() {
       const webResults = data.web?.results || [];
 
       if (webResults.length > 0) {
-        const latest = webResults[0];
-        
-        const cleanTitle = cleanHtml(latest.title);
-        const cleanSummary = truncateSpanish(latest.description);
+        let cleanTitle = cleanHtml(webResults[0].title);
+        let cleanSummary = truncateSpanish(webResults[0].description);
 
-        const isEnglish = !cleanTitle.includes('á') && !cleanTitle.includes('é') && !cleanTitle.includes('í') && 
-                          !cleanTitle.includes('ó') && !cleanTitle.includes('ú') && !cleanTitle.includes('ñ');
-        
-        const finalTitle = isEnglish && cleanTitle.length > 0 
-          ? `${sourceName}: ${cleanTitle.substring(0, 60)}`
-          : cleanTitle || `Últimas noticias de ${sourceName}`;
-        
-        const finalSummary = isEnglish && cleanSummary.length > 0
-          ? cleanSummary.substring(0, 300) + '...'
-          : cleanSummary || `Conoce las últimas actualizaciones en inteligencia artificial de ${sourceName}.`;
+        if (isEnglish(cleanTitle) || isEnglish(cleanSummary)) {
+          cleanTitle = await translateToSpanish(cleanTitle);
+          cleanSummary = await translateToSpanish(cleanSummary);
+        }
 
         const technology = sourceName.includes('Google') 
           ? 'Ecosistema Google AI' 
@@ -96,8 +126,8 @@ export async function runScraper() {
           .from('news')
           .upsert({
             source_id: source.id,
-            title: finalTitle,
-            summary: finalSummary,
+            title: cleanTitle,
+            summary: cleanSummary || `Últimas actualizaciones de ${sourceName} en inteligencia artificial.`,
             technology: technology,
             use_cases: ['Investigación de IA', 'Desarrollo tecnológico', 'Innovación digital'],
             platform: source.platform,
